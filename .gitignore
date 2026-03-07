@@ -1,0 +1,25 @@
+# Meson build directories
+build/
+builddir/
+_build/
+
+# Meson introspection and wrap cache
+subprojects/packagecache/
+.mesonpy/
+
+# Editor and IDE
+.cache/
+.clangd/
+compile_commands.json
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Claude Code
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
