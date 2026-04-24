@@ -1,4 +1,4 @@
-# everyLibC — Porting Guide
+# everyLibC Porting Guide
 
 This guide explains how to add a new PAL target (e.g., FreeBSD, macOS,
 bare-metal RISC-V) without touching any code outside `pal/`.
@@ -178,7 +178,7 @@ The `MAP_ANONYMOUS` flag is `MAP_ANON` on BSDs.
 
 Syscalls are made via `libSystem` traps or the `syscall` instruction
 with different numbering. Alternatively, link against `libSystem.dylib`
-and call `write`/`read`/`mmap` via the C ABI — this requires a single
+and call `write`/`read`/`mmap` via the C ABI, which requires a single
 external symbol and avoids raw asm.
 
 ### Bare-metal (no OS)

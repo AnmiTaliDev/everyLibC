@@ -1,4 +1,4 @@
-# everyLibC — Architecture
+# everyLibC Architecture
 
 ## Overview
 
@@ -22,7 +22,7 @@ import from higher layers.
 
 ---
 
-## Layer 1 — core/
+## Layer 1: core/
 
 Pure portable C. No system headers, no syscalls, no PAL calls.
 
@@ -35,28 +35,28 @@ Pure portable C. No system headers, no syscalls, no PAL calls.
 
 ### Algorithms
 
-- **sqrt** — Newton-Raphson (64 iterations, early exit on convergence).
-- **sin / cos** — Range-reduce to `[0, π/2]` then Taylor series (12 terms,
+- **sqrt**: Newton-Raphson (64 iterations, early exit on convergence).
+- **sin / cos**: range-reduce to `[0, π/2]` then Taylor series (12 terms,
   > 15 significant digits for `|x| ≤ π/2`).
-- **log** — Reduce `x` to `m · 2^k` where `m ∈ [1, 2)`, then
+- **log**: reduce `x` to `m · 2^k` where `m ∈ [1, 2)`, then
   `ln(m) = 2·atanh(u)` via Σ `u^(2n+1)/(2n+1)` (30 terms).
-- **exp** — Split `x = n + r`, `n` integer; compute `e^r` via Taylor (20
+- **exp**: split `x = n + r`, `n` integer; compute `e^r` via Taylor (20
   terms), then multiply by `e^n` via fast exponentiation.
-- **pow** — Fast integer path (repeated squaring); general path via
+- **pow**: fast integer path (repeated squaring); general path via
   `exp(y · log(x))`.
-- **qsort** — Lomuto partition quicksort (recursive, in-place).
-- **bsearch** — Standard iterative binary search.
+- **qsort**: Lomuto partition quicksort (recursive, in-place).
+- **bsearch**: standard iterative binary search.
 
 ### NULL pointer policy
 
 All core functions guard against `NULL` input at the function boundary and
 return a safe default (0, `NULL`, or the destination pointer) rather than
-crashing. This is a non-standard extension — standard C would invoke undefined
+crashing. This is a non-standard extension: standard C would invoke undefined
 behavior on `NULL` arguments to these functions.
 
 ---
 
-## Layer 2 — pal/
+## Layer 2: pal/
 
 The Platform Abstraction Layer is the **only** place in everyLibC that
 interacts with the OS. Every other module calls `pal_*` functions.
@@ -70,8 +70,8 @@ Implements six functions:
 | `pal_write` | `write` (1) | Full write loop handled by caller |
 | `pal_read` | `read` (0) | Returns 0 on EOF |
 | `pal_alloc` | `mmap` (9) | First-fit free-list heap |
-| `pal_realloc` | — | `pal_alloc` + byte copy + `pal_free` |
-| `pal_free` | — | Mark free + forward-coalesce |
+| `pal_realloc` | n/a | `pal_alloc` + byte copy + `pal_free` |
+| `pal_free` | n/a | Mark free + forward-coalesce |
 | `pal_exit` | `exit` (60) | Does not return |
 
 Raw syscalls use inline assembly with the x86-64 Linux ABI
@@ -99,7 +99,7 @@ mmap region:  [ Block | usable data | Block | usable data | ... ]
 
 ---
 
-## Layer 3 — io/
+## Layer 3: io/
 
 Formatted I/O built exclusively on `pal_write` and `vsnprintf`.
 
@@ -145,6 +145,7 @@ headers) and are permitted in freestanding C11 environments (ISO/IEC
 | `-ffreestanding` | Do not assume a hosted C runtime is available |
 | `-Wall -Wextra -Wpedantic` | Enable all reasonable warnings |
 | `-fno-builtin` | Prevent the compiler from replacing calls with libc equivalents |
+| `-fno-stack-protector` | Avoid an unresolved `__stack_chk_fail` when linking without the system libc |
 
 ---
 

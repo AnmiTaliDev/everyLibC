@@ -1,5 +1,4 @@
 /*
- * everyLibC - A maximally portable subset implementation of libc
  * Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
  * SPDX-License-Identifier: BSD-3-Clause
  * https://github.com/AnmiTaliDev/elibc
@@ -32,4 +31,4 @@
 #define LONG_MAX    INT64_MAX
 #define ULONG_MAX   UINT64_MAX
 
-#endif /* LIMITS_H */
+#endif

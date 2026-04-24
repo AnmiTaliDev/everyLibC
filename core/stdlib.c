@@ -1,16 +1,7 @@
 /*
- * everyLibC - A maximally portable subset implementation of libc
  * Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
  * SPDX-License-Identifier: BSD-3-Clause
  * https://github.com/AnmiTaliDev/elibc
- */
-
-/*
- * core/stdlib.c — general utilities: conversions, memory allocation
- * wrappers, process control, sorting, and searching.
- *
- * Memory functions delegate to the PAL layer via <elibc/pal.h>.
- * No other system-level calls are made from this file.
  */
 
 #include <stdlib.h>
@@ -19,21 +10,16 @@
 #include <limits.h>
 #include <elibc/pal.h>
 
-/* Integer absolute value */
 
 int abs(int x)
 {
-    /* Cast through unsigned to avoid signed-overflow UB on INT_MIN. */
     return (int)((x < 0) ? -(unsigned int)x : (unsigned int)x);
 }
 
 long labs(long x)
 {
-    /* Cast through unsigned to avoid signed-overflow UB on LONG_MIN. */
     return (long)((x < 0L) ? -(unsigned long)x : (unsigned long)x);
 }
-
-/* String-to-number conversions */
 
 long strtol(const char *s, char **endptr, int base)
 {
@@ -65,7 +51,6 @@ long strtol(const char *s, char **endptr, int base)
     const char    *start   = s;
     unsigned long  uresult = 0UL;
     unsigned long  ubase   = (unsigned long)base;
-    /* Maximum magnitude that fits in the result type. */
     unsigned long  ulimit  = negative
                              ? (unsigned long)LONG_MAX + 1UL
                              : (unsigned long)LONG_MAX;
@@ -119,22 +104,18 @@ double strtod(const char *s, char **endptr)
     if (*s == '-')      { negative = 1; s++; }
     else if (*s == '+') { s++; }
 
-    /* Recognise "nan" and "inf"/"infinity" (case-insensitive). */
     {
-        /* Uppercase first three chars without depending on ctype locale. */
         char c0 = (*s >= 'a' && *s <= 'z') ? (char)(*s - 32) : *s;
         char c1 = (*(s+1) >= 'a' && *(s+1) <= 'z') ? (char)(*(s+1) - 32) : *(s+1);
         char c2 = (*(s+2) >= 'a' && *(s+2) <= 'z') ? (char)(*(s+2) - 32) : *(s+2);
         if (c0 == 'N' && c1 == 'A' && c2 == 'N') {
             if (endptr != NULL) { *endptr = (char *)(s + 3); }
-            /* NaN: 0.0/0.0 is not portable; use the IEEE 754 identity. */
             double inf = 1e300 * 1e300;
             double nan = inf - inf;
             return negative ? -nan : nan;
         }
         if (c0 == 'I' && c1 == 'N' && c2 == 'F') {
             const char *p = s + 3;
-            /* Consume "inity" suffix if present ("infinity"). */
             if ((*p == 'i' || *p == 'I') &&
                 (*(p+1) == 'n' || *(p+1) == 'N') &&
                 (*(p+2) == 'i' || *(p+2) == 'I') &&
@@ -166,18 +147,16 @@ double strtod(const char *s, char **endptr)
     }
 
     if (*s == 'e' || *s == 'E') {
-        const char *exp_start = s; /* save position before 'e' */
+        const char *exp_start = s;
         s++;
         int exp_neg = 0;
         if (*s == '-')      { exp_neg = 1; s++; }
         else if (*s == '+') { s++; }
         if (*s < '0' || *s > '9') {
-            /* No digits after 'e' or sign — not a valid exponent; rewind. */
             s = exp_start;
         } else {
             int exp = 0;
             while (*s >= '0' && *s <= '9') {
-                /* Clamp to avoid int overflow; values > 400 saturate anyway. */
                 if (exp < 400) {
                     exp = exp * 10 + (*s - '0');
                 }
@@ -199,8 +178,6 @@ double atof(const char *s)
 {
     return strtod(s, NULL);
 }
-
-/* Number-to-string conversion */
 
 char *itoa(int n, char *buf, int base)
 {
@@ -233,8 +210,6 @@ char *itoa(int n, char *buf, int base)
     return buf;
 }
 
-/* Dynamic memory allocation — thin wrappers over PAL */
-
 void *malloc(size_t size)
 {
     return pal_alloc(size);
@@ -260,7 +235,6 @@ void free(void *ptr)
     pal_free(ptr);
 }
 
-/* Process control */
 
 void exit(int status)
 {
@@ -269,11 +243,9 @@ void exit(int status)
 
 void abort(void)
 {
-    /* 134 = 128 + SIGABRT(6) — conventional shell exit code */
     pal_exit(134);
 }
 
-/* Sorting — Lomuto quicksort */
 
 static void swap_bytes(char *a, char *b, size_t size)
 {
@@ -315,7 +287,6 @@ void qsort(void *base, size_t nmemb, size_t size,
     qsort_r((char *)base, 0, nmemb - 1, size, compar);
 }
 
-/* Binary search */
 
 void *bsearch(const void *key, const void *base,
               size_t nmemb, size_t size,

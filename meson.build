@@ -1,4 +1,3 @@
-# everyLibC - A maximally portable subset implementation of libc
 # Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
 # SPDX-License-Identifier: BSD-3-Clause
 # https://github.com/AnmiTaliDev/elibc
@@ -23,14 +22,11 @@ common_c_args = [
     '-Wpedantic',
     '-fno-builtin',
     '-ffreestanding',
+    '-fno-stack-protector',
 ]
 
 inc = include_directories('include')
 
-# Each subdir sets a source-list variable consumed below:
-#   core/     -> core_sources
-#   pal/      -> pal_sources
-#   io/       -> io_sources
 subdir('core')
 subdir('pal')
 subdir('io')
@@ -40,7 +36,30 @@ elibc = static_library(
     sources             : core_sources + pal_sources + io_sources,
     include_directories : inc,
     c_args              : common_c_args,
-    install             : false,
+    install             : true,
+)
+
+install_headers(
+    'include/ctype.h',
+    'include/limits.h',
+    'include/math.h',
+    'include/stdio.h',
+    'include/stdlib.h',
+    'include/string.h',
+    subdir : 'elibc',
+)
+
+install_headers(
+    'include/elibc/pal.h',
+    subdir : 'elibc/elibc',
+)
+
+pkg = import('pkgconfig')
+pkg.generate(
+    elibc,
+    name        : 'elibc',
+    description : 'everyLibC static library',
+    subdirs     : 'elibc',
 )
 
 subdir('tests')

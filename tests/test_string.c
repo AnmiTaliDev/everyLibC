@@ -1,15 +1,9 @@
 /*
- * everyLibC - A maximally portable subset implementation of libc
  * Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
  * SPDX-License-Identifier: BSD-3-Clause
  * https://github.com/AnmiTaliDev/elibc
  */
 
-/*
- * tests/test_string.c — tests for core/string.c
- *
- * Returns 0 on full pass, 1 on any failure.
- */
 
 #include <string.h>
 #include <stdio.h>
@@ -48,7 +42,7 @@ static int test_memcpy(void)
     memcpy(dst, "XY", 2);
     ASSERT(dst[0] == 'X');
     ASSERT(dst[1] == 'Y');
-    ASSERT(dst[2] == 'l'); /* rest unchanged */
+    ASSERT(dst[2] == 'l');
 
     ASSERT(memcpy(NULL, src, 4) == NULL);
     return 0;

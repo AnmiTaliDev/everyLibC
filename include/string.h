@@ -1,5 +1,4 @@
 /*
- * everyLibC - A maximally portable subset implementation of libc
  * Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
  * SPDX-License-Identifier: BSD-3-Clause
  * https://github.com/AnmiTaliDev/elibc
@@ -32,4 +31,4 @@ void *memset (void *s, int c, size_t n);
 int   memcmp (const void *a, const void *b, size_t n);
 void *memchr (const void *s, int c, size_t n);
 
-#endif /* STRING_H */
+#endif

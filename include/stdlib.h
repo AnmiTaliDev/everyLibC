@@ -1,5 +1,4 @@
 /*
- * everyLibC - A maximally portable subset implementation of libc
  * Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
  * SPDX-License-Identifier: BSD-3-Clause
  * https://github.com/AnmiTaliDev/elibc
@@ -37,4 +36,4 @@ void *bsearch(const void *key, const void *base,
               size_t nmemb, size_t size,
               int (*compar)(const void *, const void *));
 
-#endif /* STDLIB_H */
+#endif

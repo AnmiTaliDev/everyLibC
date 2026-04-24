@@ -1,16 +1,9 @@
 /*
- * everyLibC - A maximally portable subset implementation of libc
  * Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
  * SPDX-License-Identifier: BSD-3-Clause
  * https://github.com/AnmiTaliDev/elibc
  */
 
-/*
- * tests/test_math.c — tests for core/math.c
- *
- * Returns 0 on full pass, 1 on any failure.
- * Floating-point comparisons use an absolute tolerance of 1e-9.
- */
 
 #include <math.h>
 #include <stdlib.h>
@@ -26,7 +19,6 @@
 
 #define EPS 1e-9
 
-/* Absolute-value tolerance comparison. */
 static int near(double a, double b)
 {
     double diff = a - b;
@@ -47,7 +39,6 @@ static int test_abs_labs(void)
     ASSERT(abs(5)   ==  5);
     ASSERT(abs(-5)  ==  5);
     ASSERT(abs(0)   ==  0);
-    /* Near INT_MIN: verify no signed-overflow UB (fixed via unsigned cast). */
     ASSERT(abs(-2147483647) == 2147483647);
     ASSERT(labs(5L)  ==  5L);
     ASSERT(labs(-5L) ==  5L);
@@ -105,7 +96,7 @@ static int test_exp(void)
     ASSERT(near(exp(1.0),  M_E));
     ASSERT(near(exp(-1.0), 1.0 / M_E));
     ASSERT(near(exp(2.0),  M_E * M_E));
-    ASSERT(near(exp(0.5),  1.6487212707)); /* sqrt(e) ≈ 1.6487212707 */
+    ASSERT(near(exp(0.5),  1.6487212707));
     return 0;
 }
 
@@ -135,7 +126,6 @@ static int test_log2_log10(void)
 
 static int test_sin_cos(void)
 {
-    /* sin */
     ASSERT(near(sin(0.0),          0.0));
     ASSERT(near(sin(M_PI / 2.0),   1.0));
     ASSERT(near(sin(M_PI),         0.0));
@@ -143,13 +133,11 @@ static int test_sin_cos(void)
     ASSERT(near(sin(2.0 * M_PI),   0.0));
     ASSERT(near(sin(-M_PI / 2.0),  -1.0));
 
-    /* cos */
     ASSERT(near(cos(0.0),          1.0));
     ASSERT(near(cos(M_PI / 2.0),   0.0));
     ASSERT(near(cos(M_PI),        -1.0));
     ASSERT(near(cos(2.0 * M_PI),   1.0));
 
-    /* Pythagorean identity */
     double s = sin(1.2345);
     double c = cos(1.2345);
     ASSERT(near(s * s + c * c, 1.0));
@@ -161,7 +149,6 @@ static int test_tan(void)
     ASSERT(near(tan(0.0), 0.0));
     ASSERT(near(tan(M_PI / 4.0), 1.0));
     ASSERT(near(tan(-M_PI / 4.0), -1.0));
-    /* Near π/2 the result must be a large finite or infinite value. */
     double t = tan(M_PI / 2.0);
     ASSERT(t > 1e9 || isinf(t));
     return 0;
@@ -172,13 +159,12 @@ static int test_classification(void)
     ASSERT(!isnan(0.0));
     ASSERT(!isnan(1.0));
     ASSERT(!isnan(-1.0));
-    /* sqrt(-1) must return NaN (Inf - Inf via IEEE 754). */
     ASSERT(isnan(sqrt(-1.0)));
 
     ASSERT(!isinf(0.0));
     ASSERT(!isinf(1.0));
-    ASSERT( isinf(1e300 * 1e300));   /* +Inf */
-    ASSERT( isinf(-(1e300 * 1e300))); /* -Inf */
+    ASSERT( isinf(1e300 * 1e300));
+    ASSERT( isinf(-(1e300 * 1e300)));
     return 0;
 }
 

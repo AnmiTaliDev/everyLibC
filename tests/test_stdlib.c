@@ -1,14 +1,7 @@
 /*
- * everyLibC - A maximally portable subset implementation of libc
  * Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
  * SPDX-License-Identifier: BSD-3-Clause
  * https://github.com/AnmiTaliDev/elibc
- */
-
-/*
- * tests/test_stdlib.c — tests for core/stdlib.c
- *
- * Returns 0 on full pass, 1 on any failure.
  */
 
 #include <stdlib.h>
@@ -56,7 +49,6 @@ static int test_strtol(void)
     strtol("42abc", &end, 10);
     ASSERT(*end == 'a');
 
-    /* Overflow must clamp to LONG_MAX / LONG_MIN, not wrap. */
     ASSERT(strtol("99999999999999999999",  NULL, 10) == LONG_MAX);
     ASSERT(strtol("-99999999999999999999", NULL, 10) == LONG_MIN);
     return 0;
@@ -111,7 +103,7 @@ static int test_malloc_free(void)
 
     ASSERT(malloc(0) == NULL);
 
-    free(NULL); /* must not crash */
+    free(NULL);
     return 0;
 }
 

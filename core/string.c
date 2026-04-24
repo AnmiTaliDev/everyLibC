@@ -1,20 +1,11 @@
 /*
- * everyLibC - A maximally portable subset implementation of libc
  * Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
  * SPDX-License-Identifier: BSD-3-Clause
  * https://github.com/AnmiTaliDev/elibc
  */
 
-/*
- * core/string.c — portable string and memory primitives.
- *
- * No system headers, no system calls.  All functions operate on raw
- * bytes; NULL pointer arguments are guarded at each function entry.
- */
-
 #include <string.h>
 
-/* Memory primitives */
 
 void *memset(void *s, int c, size_t n)
 {
@@ -51,12 +42,10 @@ void *memmove(void *dst, const void *src, size_t n)
     const unsigned char *s = (const unsigned char *)src;
 
     if (d < s || d >= s + n) {
-        /* Regions do not overlap, or dst is before src: copy forward. */
         while (n--) {
             *d++ = *s++;
         }
     } else {
-        /* dst overlaps src from behind: copy backwards to avoid clobber. */
         d += n;
         s += n;
         while (n--) {
@@ -99,8 +88,6 @@ void *memchr(const void *s, int c, size_t n)
     return NULL;
 }
 
-/* String length */
-
 size_t strlen(const char *s)
 {
     if (s == NULL) {
@@ -113,8 +100,6 @@ size_t strlen(const char *s)
     return (size_t)(p - s);
 }
 
-/* String copy */
-
 char *strcpy(char *dst, const char *src)
 {
     if (dst == NULL || src == NULL) {
@@ -122,7 +107,6 @@ char *strcpy(char *dst, const char *src)
     }
     char *d = dst;
     while ((*d++ = *src++) != '\0') {
-        /* copy including null terminator */
     }
     return dst;
 }
@@ -139,7 +123,6 @@ char *strncpy(char *dst, const char *src, size_t n)
     for (i = 0; i < n; i++) {
         d[i] = s[i];
         if (s[i] == '\0') {
-            /* Pad remainder with null bytes (POSIX strncpy semantics). */
             i++;
             while (i < n) {
                 d[i++] = '\0';
@@ -147,11 +130,8 @@ char *strncpy(char *dst, const char *src, size_t n)
             return dst;
         }
     }
-    /* Result is NOT null-terminated when src is >= n chars (by spec). */
     return dst;
 }
-
-/* String concatenation */
 
 char *strcat(char *dst, const char *src)
 {
@@ -163,7 +143,6 @@ char *strcat(char *dst, const char *src)
         d++;
     }
     while ((*d++ = *src++) != '\0') {
-        /* copy src including null terminator */
     }
     return dst;
 }
@@ -186,8 +165,6 @@ char *strncat(char *dst, const char *src, size_t n)
     *d = '\0';
     return dst;
 }
-
-/* String comparison */
 
 int strcmp(const char *a, const char *b)
 {
@@ -226,7 +203,6 @@ int strncmp(const char *a, const char *b, size_t n)
     return 0;
 }
 
-/* Character search */
 
 char *strchr(const char *s, int c)
 {
@@ -264,8 +240,6 @@ char *strrchr(const char *s, int c)
     }
     return (char *)last;
 }
-
-/* Substring search */
 
 char *strstr(const char *haystack, const char *needle)
 {

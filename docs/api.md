@@ -1,4 +1,4 @@
-# everyLibC — API Reference
+# everyLibC API Reference
 
 All public symbols use standard C names. Headers are placed at `include/` and
 are designed to shadow the system libc when everyLibC is linked statically.
@@ -33,7 +33,7 @@ typedef long ssize_t;
 
 All functions guard against `NULL` input at the function boundary and return a
 safe default (0, `NULL`, or the destination pointer) rather than crashing.
-This is a non-standard extension — standard C invokes undefined behavior on
+This is a non-standard extension: standard C invokes undefined behavior on
 `NULL` arguments.
 
 ### Memory
@@ -140,7 +140,7 @@ int isnan(double x);               /* non-zero if x is NaN */
 **`abs(INT_MIN)` and `labs(LONG_MIN)`:** The mathematical absolute value
 exceeds the range of the return type. The implementation avoids UB by casting
 through the corresponding unsigned type; the result on two's-complement systems
-wraps back to the minimum value — the same behavior as standard `abs(INT_MIN)`.
+wraps back to the minimum value, the same behavior as standard `abs(INT_MIN)`.
 
 ---
 
@@ -159,14 +159,14 @@ double strtod(const char *s, char **endptr);
 char  *itoa(int n, char *buf, int base);
 ```
 
-**`strtol`** — base 0 auto-detects (0x prefix → 16, 0 prefix → 8, else 10).
+**`strtol`**: base 0 auto-detects (0x prefix → 16, 0 prefix → 8, else 10).
 Overflow clamps to `LONG_MAX` / `LONG_MIN` (no errno).
 
-**`strtod`** — supports `[+-]digits[.digits][eE[+-]digits]`. Exponent clamped
+**`strtod`**: supports `[+-]digits[.digits][eE[+-]digits]`. Exponent clamped
 to ±400 to prevent integer overflow. If no digit follows `e` or `eE±`, the `e`
 is not consumed and `endptr` points before it.
 
-**`itoa`** — non-standard. Base must be in [2, 36]; `buf` must hold at least
+**`itoa`**: non-standard. Base must be in [2, 36]; `buf` must hold at least
 34 bytes for the base-2 representation of `INT_MIN`.
 
 ### Memory
@@ -199,10 +199,10 @@ void *bsearch(const void *key, const void *base,
               int (*compar)(const void *, const void *));
 ```
 
-**`qsort`** — Lomuto partition quicksort. Not stable. Average O(n log n),
+**`qsort`**: Lomuto partition quicksort. Not stable. Average O(n log n),
 worst case O(n²) for adversarial input.
 
-**`bsearch`** — Standard binary search on a sorted array. Returns a pointer to
+**`bsearch`**: standard binary search on a sorted array. Returns a pointer to
 a matching element, or `NULL` if not found.
 
 ---
@@ -234,7 +234,7 @@ a matching element, or `NULL` if not found.
 | `%s` | `const char *` | `NULL` prints as `(null)` |
 | `%c` | `int` | single character |
 | `%f` | `double` | decimal notation |
-| `%%` | — | literal `%` |
+| `%%` | n/a | literal `%` |
 
 ### Flags, width, precision
 
@@ -252,7 +252,7 @@ a matching element, or `NULL` if not found.
 int printf (const char *fmt, ...);
 int dprintf(int fd, const char *fmt, ...);
 
-/* UNSAFE — no bounds check; caps at 4096 bytes. Use snprintf instead. */
+/* UNSAFE: no bounds check; caps at 4096 bytes. Use snprintf instead. */
 int sprintf (char *buf, const char *fmt, ...);
 
 /* Always null-terminates; returns full intended length (snprintf semantics). */

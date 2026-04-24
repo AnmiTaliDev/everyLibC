@@ -1,5 +1,4 @@
 /*
- * everyLibC - A maximally portable subset implementation of libc
  * Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
  * SPDX-License-Identifier: BSD-3-Clause
  * https://github.com/AnmiTaliDev/elibc
@@ -39,4 +38,4 @@ double tan(double x);
 int isinf(double x);
 int isnan(double x);
 
-#endif /* MATH_H */
+#endif

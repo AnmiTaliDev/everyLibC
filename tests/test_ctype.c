@@ -1,14 +1,7 @@
 /*
- * everyLibC - A maximally portable subset implementation of libc
  * Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
  * SPDX-License-Identifier: BSD-3-Clause
  * https://github.com/AnmiTaliDev/elibc
- */
-
-/*
- * tests/test_ctype.c — tests for core/ctype.c
- *
- * Returns 0 on full pass, 1 on any failure.
  */
 
 #include <ctype.h>
@@ -133,15 +126,14 @@ static int test_toupper_tolower(void)
 {
     ASSERT(toupper('a') == 'A');
     ASSERT(toupper('z') == 'Z');
-    ASSERT(toupper('A') == 'A'); /* already upper */
-    ASSERT(toupper('0') == '0'); /* non-alpha unchanged */
+    ASSERT(toupper('A') == 'A');
+    ASSERT(toupper('0') == '0');
 
     ASSERT(tolower('A') == 'a');
     ASSERT(tolower('Z') == 'z');
-    ASSERT(tolower('a') == 'a'); /* already lower */
+    ASSERT(tolower('a') == 'a');
     ASSERT(tolower('9') == '9');
 
-    /* Round-trip */
     ASSERT(tolower(toupper('m')) == 'm');
     return 0;
 }

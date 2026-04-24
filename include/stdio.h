@@ -1,5 +1,4 @@
 /*
- * everyLibC - A maximally portable subset implementation of libc
  * Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
  * SPDX-License-Identifier: BSD-3-Clause
  * https://github.com/AnmiTaliDev/elibc
@@ -27,4 +26,4 @@ int snprintf(char *buf, size_t size, const char *fmt, ...);
 int vprintf  (const char *fmt, va_list ap);
 int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap);
 
-#endif /* STDIO_H */
+#endif

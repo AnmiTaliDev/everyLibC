@@ -1,22 +1,7 @@
 /*
- * everyLibC - A maximally portable subset implementation of libc
  * Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
  * SPDX-License-Identifier: BSD-3-Clause
  * https://github.com/AnmiTaliDev/elibc
- */
-
-/*
- * pal/linux/pal_linux.c — Linux PAL implementation for x86-64.
- *
- * This is the ONLY everyLibC source file that calls into the OS.
- * All system interactions go through explicit inline-assembly syscalls;
- * no libc headers are included.
- *
- * Syscalls used:
- *   0  — read
- *   1  — write
- *   9  — mmap
- *   60 — exit
  */
 
 #include <elibc/pal.h>
@@ -24,11 +9,6 @@
 #if !defined(__x86_64__) && !defined(__amd64__)
 #  error "pal/linux/pal_linux.c is currently only supported on x86-64."
 #endif
-
-/* Raw syscall wrappers — x86-64 Linux ABI
- * Argument registers: rdi rsi rdx r10 r8 r9
- * Return value:       rax (negative errno on error)
- * Clobbered:          rcx r11 */
 
 static long syscall1(long n, long a1)
 {
@@ -70,7 +50,6 @@ static long syscall6(long n, long a1, long a2, long a3,
     return ret;
 }
 
-/* mmap flags and protection constants (x86-64 Linux values) */
 #define PROT_READ      0x1
 #define PROT_WRITE     0x2
 #define MAP_PRIVATE    0x02
@@ -79,44 +58,35 @@ static long syscall6(long n, long a1, long a2, long a3,
 
 static void *linux_mmap(size_t length)
 {
-    long ret = syscall6(9,                              /* sys_mmap       */
-                        0L,                             /* addr — any     */
+    long ret = syscall6(9,
+                        0L,
                         (long)length,
                         (long)(PROT_READ | PROT_WRITE),
                         (long)(MAP_PRIVATE | MAP_ANONYMOUS),
-                        -1L,                            /* fd — anon      */
-                        0L);                            /* offset         */
+                        -1L,
+                        0L);
     if (ret < 0 && ret > -4096L) {
         return MAP_FAILED;
     }
     return (void *)ret;
 }
 
-/*
- * Heap allocator built on mmap.
- *
- * Block layout:   [ AllocBlock header | usable data region ]
- *
- * All sizes are aligned to ALLOC_ALIGN bytes.  Freed blocks are
- * forward-coalesced to reduce fragmentation.
- */
 
 typedef struct AllocBlock {
-    size_t            size; /* usable bytes, not including the header */
+    size_t            size;
     int               free;
     struct AllocBlock *next;
 } AllocBlock;
 
 #define ALLOC_ALIGN  16UL
 #define HEADER_SIZE  (sizeof(AllocBlock))
-#define CHUNK_SIZE   (1024UL * 1024UL) /* 1 MiB per mmap request */
+#define CHUNK_SIZE   (1024UL * 1024UL)
 
 #define ALIGN_UP(n) \
     (((size_t)(n) + (ALLOC_ALIGN - 1UL)) & ~(ALLOC_ALIGN - 1UL))
 
 static AllocBlock *heap_head = (AllocBlock *)0;
 
-/* Internal byte copy — avoids a compile-time dependency on core/string.c. */
 static void alloc_memcpy(void *dst, const void *src, size_t n)
 {
     unsigned char       *d = (unsigned char *)dst;
@@ -192,7 +162,6 @@ void pal_free(void *ptr)
     AllocBlock *b = (AllocBlock *)((char *)ptr - HEADER_SIZE);
     b->free = 1;
 
-    /* Forward-coalesce consecutive free blocks. */
     while (b->next != (AllocBlock *)0 && b->next->free) {
         b->size += HEADER_SIZE + b->next->size;
         b->next  = b->next->next;
@@ -218,8 +187,6 @@ void *pal_realloc(void *ptr, size_t size)
     return new_ptr;
 }
 
-/* I/O */
-
 ssize_t pal_write(int fd, const void *buf, size_t count)
 {
     if (buf == NULL || count == 0) { return 0; }
@@ -232,10 +199,9 @@ ssize_t pal_read(int fd, void *buf, size_t count)
     return (ssize_t)syscall3(0, (long)fd, (long)buf, (long)count);
 }
 
-/* Process exit */
 
 void pal_exit(int status)
 {
     syscall1(60, (long)status);
-    while (1) { /* unreachable — suppresses noreturn warnings */ }
+    while (1) { }
 }

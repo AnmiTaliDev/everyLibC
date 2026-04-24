@@ -1,18 +1,9 @@
 /*
- * everyLibC - A maximally portable subset implementation of libc
  * Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
  * SPDX-License-Identifier: BSD-3-Clause
  * https://github.com/AnmiTaliDev/elibc
  */
 
-/*
- * tests/test_io.c — tests for io/stdio.c
- *
- * Returns 0 on full pass, 1 on any failure.
- * printf output to stdout is considered a smoke test (not checked
- * programmatically); sprintf and snprintf are verified by comparing
- * the resulting string with expected output.
- */
 
 #include <stdio.h>
 #include <string.h>
@@ -151,13 +142,11 @@ static int test_snprintf_bounds(void)
 {
     char buf[8];
 
-    /* Total output would be 13 chars; snprintf must truncate to 7 + NUL. */
     int n = snprintf(buf, sizeof(buf), "%s", "Hello, world!");
-    ASSERT(n == 13);           /* returns full intended length */
-    ASSERT(buf[7] == '\0');    /* always null-terminated */
+    ASSERT(n == 13);
+    ASSERT(buf[7] == '\0');
     ASSERT(strncmp(buf, "Hello, ", 7) == 0);
 
-    /* Exactly fits. */
     n = snprintf(buf, 4, "%d", 123);
     ASSERT(n == 3);
     ASSERT(strcmp(buf, "123") == 0);
@@ -184,7 +173,6 @@ static int test_sprintf_long(void)
 static int test_sprintf_pointer(void)
 {
     char buf[32];
-    /* %p must produce "0x"-prefixed hex; exact digits are platform-dependent. */
     int dummy = 0;
     sprintf(buf, "%p", (void *)&dummy);
     ASSERT(buf[0] == '0' && buf[1] == 'x');
@@ -204,7 +192,6 @@ static int test_sprintf_zu(void)
 
 static int test_printf_smoke(void)
 {
-    /* Verify printf does not crash and returns a positive count. */
     int n = printf("smoke: %d %s %x %.2f\n", 1, "ok", 0xFF, 3.14);
     ASSERT(n > 0);
     return 0;

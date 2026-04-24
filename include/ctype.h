@@ -1,5 +1,4 @@
 /*
- * everyLibC - A maximally portable subset implementation of libc
  * Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
  * SPDX-License-Identifier: BSD-3-Clause
  * https://github.com/AnmiTaliDev/elibc
@@ -22,4 +21,4 @@ int iscntrl (int c);
 int toupper(int c);
 int tolower(int c);
 
-#endif /* CTYPE_H */
+#endif

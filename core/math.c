@@ -1,54 +1,29 @@
 /*
- * everyLibC - A maximally portable subset implementation of libc
  * Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
  * SPDX-License-Identifier: BSD-3-Clause
  * https://github.com/AnmiTaliDev/elibc
  */
 
-/*
- * core/math.c — algorithmic floating-point mathematics.
- *
- * All functions are implemented without FPU-specific intrinsics or
- * libm symbols.  Techniques used:
- *   sqrt  — Newton-Raphson iteration
- *   sin/cos — range reduction to [0, π/2] then Taylor series
- *   log   — range reduction to [1, 2), then atanh series
- *   exp   — range reduction to [0, 1), then Taylor series
- *   pow   — fast integer path; general path via exp(y·log(x))
- *
- * No system headers, no system calls.
- */
-
 #include <math.h>
 
-/* Large finite value used internally for overflow results. */
 #define ELIBC_HUGE 1e300
 
-/* Classification */
 
 int isnan(double x)
 {
-    /* IEEE 754: NaN is the only value not equal to itself. */
     return x != x;
 }
 
 int isinf(double x)
 {
-    /* Infinity doubled equals itself; exclude zero explicitly. */
     return (x != 0.0) && (x + x == x);
 }
-
-/* Absolute value */
 
 double fabs(double x)
 {
     return (x < 0.0) ? -x : x;
 }
 
-/* Rounding */
-
-/* 2^63: values at or above this threshold are already integral in double
- * (52-bit mantissa cannot represent a fractional part at this magnitude). */
 #define FLOOR_LIMIT 9.22337203685477580800e+18
 
 double floor(double x)
@@ -85,13 +60,12 @@ double round(double x)
     return ceil(x - 0.5);
 }
 
-/* Square root — Newton-Raphson */
 
 double sqrt(double x)
 {
     if (x < 0.0) {
-        double inf = ELIBC_HUGE * ELIBC_HUGE; /* +Inf */
-        return inf - inf;                      /* NaN (IEEE 754: Inf - Inf) */
+        double inf = ELIBC_HUGE * ELIBC_HUGE;
+        return inf - inf;
     }
     if (x == 0.0) {
         return 0.0;
@@ -111,7 +85,6 @@ double sqrt(double x)
     return guess;
 }
 
-/* Internal: base^n for non-negative integer n. */
 static double ipow(double base, int n)
 {
     double result = 1.0;
@@ -125,8 +98,6 @@ static double ipow(double base, int n)
     return result;
 }
 
-/* Exponential e^x */
-
 double exp(double x)
 {
     if (isnan(x)) {
@@ -139,7 +110,6 @@ double exp(double x)
         return 0.0;
     }
 
-    /* Split x = n + r, n integer, r ∈ [0, 1). */
     int    n = (int)x;
     double r = x - (double)n;
     if (r < 0.0) {
@@ -147,11 +117,6 @@ double exp(double x)
         r += 1.0;
     }
 
-    /*
-     * Taylor series for e^r, r ∈ [0, 1):
-     *   e^r = 1 + r + r^2/2! + r^3/3! + ...
-     * 20 terms give full double precision for r ∈ [0, 1).
-     */
     double er   = 1.0;
     double term = 1.0;
     int    k;
@@ -164,39 +129,27 @@ double exp(double x)
     return en * er;
 }
 
-/* Natural logarithm ln(x) */
-
 double log(double x)
 {
     if (isnan(x)) {
         return x;
     }
     if (x == 0.0) {
-        return -(ELIBC_HUGE * ELIBC_HUGE); /* -Inf: log(0) = -∞ */
+        return -(ELIBC_HUGE * ELIBC_HUGE);
     }
     if (x < 0.0) {
         double inf = ELIBC_HUGE * ELIBC_HUGE;
-        return inf - inf; /* NaN: log of negative is undefined */
+        return inf - inf;
     }
     if (x == 1.0) {
         return 0.0;
     }
 
-    /*
-     * Reduce x to m * 2^k where m ∈ [1, 2).
-     * ln(x) = ln(m) + k * ln(2)
-     */
     int    k = 0;
     double m = x;
     while (m >= 2.0) { m *= 0.5; k++; }
     while (m < 1.0)  { m *= 2.0; k--; }
 
-    /*
-     * ln(m) via atanh identity for m ∈ [1, 2):
-     *   ln(m) = 2 * atanh(u) = 2 * Σ u^(2n+1)/(2n+1)
-     * where u = (m-1)/(m+1) ∈ [0, 1/3).
-     * 30 terms give full double precision.
-     */
     double u   = (m - 1.0) / (m + 1.0);
     double u2  = u * u;
     double sum = 0.0;
@@ -220,7 +173,6 @@ double log10(double x)
     return log(x) * M_LOG10E;
 }
 
-/* Power base^exponent */
 
 double pow(double base, double exponent)
 {
@@ -239,20 +191,11 @@ double pow(double base, double exponent)
     }
 
     if (base < 0.0) {
-        /* C standard: pow(negative, non-integer) → NaN. */
         double inf = ELIBC_HUGE * ELIBC_HUGE;
         return inf - inf;
     }
     return exp(exponent * log(base));
 }
-
-/* Trigonometric functions
- *
- * Precision note: range reduction uses floating-point division by 2π.
- * For |x| > ~4.5e15 the 52-bit mantissa cannot represent the fractional
- * part of x/2π, so sin/cos/tan results become meaningless.
- * Full-range accuracy requires Payne-Hanek reduction (not implemented).
- */
 
 static double reduce_angle(double x)
 {
@@ -268,11 +211,6 @@ static double reduce_angle(double x)
     return x;
 }
 
-/*
- * Taylor series for sin on [0, π/2]:
- *   sin(x) = x - x^3/3! + x^5/5! - x^7/7! + ...
- * 12 terms give > 15 significant digits for |x| ≤ π/2.
- */
 static double sin_core(double x)
 {
     double result = 0.0;
@@ -289,7 +227,7 @@ static double sin_core(double x)
 double sin(double x)
 {
     if (isnan(x) || isinf(x)) {
-        return x - x; /* NaN */
+        return x - x;
     }
 
     double r        = reduce_angle(x);
@@ -310,7 +248,7 @@ double sin(double x)
 double cos(double x)
 {
     if (isnan(x) || isinf(x)) {
-        return x - x; /* NaN */
+        return x - x;
     }
     return sin(M_PI * 0.5 - x);
 }
@@ -319,7 +257,6 @@ double tan(double x)
 {
     double s = sin(x);
     double c = cos(x);
-    /* Use a small threshold; Taylor series never gives exact 0.0 near π/2. */
     if (fabs(c) < 1e-10) {
         return (s >= 0.0) ? ELIBC_HUGE * ELIBC_HUGE : -(ELIBC_HUGE * ELIBC_HUGE);
     }

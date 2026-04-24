@@ -1,41 +1,13 @@
 /*
- * everyLibC - A maximally portable subset implementation of libc
  * Copyright (c) 2026 AnmiTaliDev <anmitalidev@nuros.org>
  * SPDX-License-Identifier: BSD-3-Clause
  * https://github.com/AnmiTaliDev/elibc
- */
-
-/*
- * io/stdio.c — formatted I/O built exclusively on the PAL interface.
- *
- * No system headers, no direct OS calls.  All output flows through
- * pal_write(); all formatting is done by vsnprintf().
- *
- * Format specifiers supported:
- *   %d %i              signed int
- *   %u                 unsigned int
- *   %ld %li %lld %lli  signed long / long long
- *   %lu %llu           unsigned long / long long
- *   %s                 null-terminated string
- *   %c                 character
- *   %x %X              unsigned hex (lower / upper)
- *   %p                 pointer (0x-prefixed hex)
- *   %f                 double (basic)
- *   %zu                size_t
- *   %%                 literal percent
- *
- * Flags:     -  (left-align)   0  (zero-fill)   +  (force sign)
- * Width:     decimal field width
- * Precision: .N for %f (digits after decimal point)
- *
- * <stdarg.h> is a compiler built-in, permitted in freestanding C11.
  */
 
 #include <stdio.h>
 #include <string.h>
 #include <elibc/pal.h>
 
-/* Write all `count` bytes; retry on short write, return -1 on error. */
 static int write_all(int fd, const char *buf, size_t count)
 {
     size_t written = 0;
@@ -47,7 +19,6 @@ static int write_all(int fd, const char *buf, size_t count)
     return 0;
 }
 
-/* Write `val` in `base` into tmp[], return character count. */
 static int fmt_uint(char *buf, size_t bufsz, size_t pos,
                     unsigned long long val, unsigned int base, int upper_case)
 {
@@ -79,7 +50,6 @@ static int fmt_uint(char *buf, size_t bufsz, size_t pos,
     return written;
 }
 
-/* Write `val` as signed decimal, optional '+' prefix. */
 static int fmt_int(char *buf, size_t bufsz, size_t pos,
                    long long val, int flag_plus)
 {
@@ -105,13 +75,12 @@ static int fmt_int(char *buf, size_t bufsz, size_t pos,
     return written;
 }
 
-/* Write double `val` with `prec` fractional digits. */
 static int fmt_double(char *buf, size_t bufsz, size_t pos,
                       double val, int prec)
 {
     int written = 0;
 
-    if (val != val) { /* NaN */
+    if (val != val) {
         const char *s = "nan";
         while (*s) {
             if (pos + (size_t)written + 1 < bufsz) {
@@ -129,7 +98,7 @@ static int fmt_double(char *buf, size_t bufsz, size_t pos,
         }
         written++;
         val = -val;
-    } else if (val + val == val && val != 0.0) { /* +Inf */
+    } else if (val + val == val && val != 0.0) {
         const char *s = "inf";
         while (*s) {
             if (pos + (size_t)written + 1 < bufsz) {
@@ -191,7 +160,6 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
         if (*fmt != '%') { PUTC(*fmt++); continue; }
         fmt++;
 
-        /* Flags */
         int flag_left = 0, flag_zero = 0, flag_plus = 0;
         for (;;) {
             if      (*fmt == '-') { flag_left = 1; fmt++; }
@@ -201,14 +169,12 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
         }
         if (flag_left) { flag_zero = 0; }
 
-        /* Width */
         int width = 0;
         while (*fmt >= '0' && *fmt <= '9') {
             width = width * 10 + (*fmt - '0');
             fmt++;
         }
 
-        /* Precision */
         int precision = -1;
         if (*fmt == '.') {
             fmt++;
@@ -219,7 +185,6 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
             }
         }
 
-        /* Length modifier */
         int mod_ll = 0, mod_l = 0, mod_z = 0;
         if (*fmt == 'l') {
             fmt++;
@@ -232,7 +197,6 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 
         char spec = *fmt++;
 
-        /* Intermediate buffer for the formatted argument */
         char   tmp[128];
         size_t tmp_len = 0;
         int    i;
@@ -314,7 +278,6 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
             continue;
         }
 
-        /* Apply width padding */
         int  pad_needed = width - (int)tmp_len;
         char pad_char   = (flag_zero && !flag_left) ? '0' : ' ';
 
