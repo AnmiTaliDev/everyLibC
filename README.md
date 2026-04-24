@@ -15,10 +15,10 @@ Three independent layers. Each layer may only call downward, never upward.
 ```
 ┌──────────────────────────────────────────────────────┐
 │  Layer 3 · io/          Formatted I/O                │
-│  (printf, snprintf, dprintf — built on PAL only)     │
+│  (printf, snprintf, dprintf built on PAL only)     │
 ├──────────────────────────────────────────────────────┤
 │  Layer 2 · pal/         Platform Abstraction Layer   │
-│  linux/ — raw Linux x86-64 syscalls + mmap heap      │
+│  linux/ raw Linux x86-64 syscalls + mmap heap      │
 ├──────────────────────────────────────────────────────┤
 │  Layer 1 · core/        Pure portable algorithms     │
 │  string.h  math.h  ctype.h  stdlib.h  limits.h       │
@@ -26,7 +26,7 @@ Three independent layers. Each layer may only call downward, never upward.
 └──────────────────────────────────────────────────────┘
 ```
 
-### Layer 1 — `core/`
+### Layer 1 `core/`
 
 Completely platform-independent. No system calls, no platform headers.
 
@@ -38,19 +38,19 @@ Completely platform-independent. No system calls, no platform headers.
 | `stdlib.h` | `abs`, `labs`, `atoi`, `atol`, `atof`, `strtol`, `strtod`, `itoa`, `malloc`, `calloc`, `realloc`, `free`, `exit`, `abort`, `qsort`, `bsearch` |
 | `limits.h` | `INT_MIN`, `INT_MAX`, `LONG_MIN`, `LONG_MAX` |
 
-Math is implemented algorithmically — no libm dependency:
+Math is implemented algorithmically, no libm dependency:
 
-- **`sqrt`** — Newton-Raphson (64 iterations)
-- **`sin` / `cos`** — angle reduced to `[0, π/2]`, 12-term Taylor series
-- **`log`** — range reduction to `[1, 2)`, atanh series (30 terms)
-- **`exp`** — integer/fractional split, 20-term Taylor for fractional part
-- **`pow`** — fast integer path; general path via `exp(y·log(x))`
+- **`sqrt`** Newton-Raphson (64 iterations)
+- **`sin` / `cos`** angle reduced to `[0, π/2]`, 12-term Taylor series
+- **`log`** range reduction to `[1, 2)`, atanh series (30 terms)
+- **`exp`** integer/fractional split, 20-term Taylor for fractional part
+- **`pow`** fast integer path; general path via `exp(y·log(x))`
 
 > **Note:** `sin`/`cos`/`tan` lose accuracy for `|x| > ~4.5e15` due to
 > double's 52-bit mantissa. Full-range accuracy requires Payne-Hanek
 > reduction, which is not yet implemented.
 
-### Layer 2 — `pal/`
+### Layer 2 `pal/`
 
 The OS boundary. Only files in this layer may use platform headers or
 inline assembly.
@@ -64,9 +64,9 @@ Raw `syscall` instruction via inline GCC/Clang assembly.
 | `pal_write` | `write` (1) |
 | `pal_read` | `read` (0) |
 | `pal_exit` | `exit` (60) |
-| `pal_alloc` / `pal_free` | `mmap` (9) — first-fit free-list heap, 16-byte aligned, 1 MiB chunks |
+| `pal_alloc` / `pal_free` | `mmap` (9) first-fit free-list heap, 16-byte aligned, 1 MiB chunks |
 
-### Layer 3 — `io/`
+### Layer 3  `io/`
 
 `stdio.c` implements formatted I/O on top of `pal_write`. Core engine: `vsnprintf`.
 
