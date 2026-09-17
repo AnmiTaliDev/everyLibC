@@ -27,7 +27,7 @@ Items are ordered by priority; no fixed dates are assigned.
 
 Extend PAL support to the major open-source Unix families.
 
-- [ ] **FreeBSD PAL** (`pal/freebsd/`) x86-64 syscall ABI; FreeBSD-specific
+- [x] **FreeBSD PAL** (`pal/freebsd/`) x86-64 syscall ABI; FreeBSD-specific
       mmap flags (`MAP_ANON`) and syscall numbers (`write`=4, `mmap`=197)
 - [ ] **OpenBSD PAL** (`pal/openbsd/`) pledge/unveil awareness; separate
       mmap semantics

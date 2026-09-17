@@ -1,7 +1,7 @@
 option(
     'platform',
     type        : 'combo',
-    choices     : ['linux'],
+    choices     : ['linux', 'freebsd'],
     value       : 'linux',
     description : 'Target platform for the PAL (Platform Abstraction Layer).'
 )
